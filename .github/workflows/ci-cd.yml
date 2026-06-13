@@ -19,8 +19,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: /home/greg.vudse26.cloud/public_html/
+          local-dir: ./src/
+          server-dir: /public_html/
           dangerous-clean-slate: false
           exclude: |
             .github
