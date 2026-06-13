@@ -1,4 +1,4 @@
-name: Greg's Calculator CI/CD
+name: Landing Page CI/CD
 
 on:
   push:
@@ -6,26 +6,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  
   deploy:
-    name: Deploy to VPS
+    name: Deploy Landing Page to VPS
     runs-on: ubuntu-latest
     steps:
-        - name: Checkout code 
-          uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
        
-        - name: FTP Deploy
-          uses: "SamKirkland/FTP-Deploy-Action@4.3.4"
-          with: 
-            server: ${{ secrets.FTP_SERVER }}
-            username: ${{ secrets.FTP_USERNAME }}
-            password: ${{ secrets.FTP_PASSWORD }}
-            local-dir: "./src"
-            server-dir: 'public_html/'
-            exclude: |
-              .github
-              .git
-              node_modules
-              .vscode
-              .env
-          
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /home/greg.vudse26.cloud/public_html/
+          dangerous-clean-slate: false
+          exclude: |
+            .github
+            .git
+            node_modules
+            .vscode
+            .env
+            *.md
+            .gitignore
+
+  verify:
+    name: Verify Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: Check landing page
+        run: |
+          echo "Checking https://greg.vudse26.cloud"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://greg.vudse26.cloud)
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ Landing page is live! (Status: $STATUS)"
+          else
+            echo "❌ Landing page returned status: $STATUS"
+            exit 1
+          fi
+      
+      - name: Check calculator page
+        run: |
+          echo "Checking https://greg.vudse26.cloud/calculator/"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://greg.vudse26.cloud/calculator/)
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ Calculator is live! (Status: $STATUS)"
+          else
+            echo "⚠️ Calculator page returned status: $STATUS"
+          fi
